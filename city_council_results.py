@@ -42,7 +42,7 @@ relevant_districts_2010.loc[:, 'GENERAL'] = pd.to_numeric(relevant_districts_201
 for district in ['10', '21', '25']:
     plt.figure(figsize=(8, 6))
     
-    # Calculate maximum vote totals for 2006 and 2008
+    # Calculate maximum vote totals
     max_votes_2006 = relevant_districts_2006[relevant_districts_2006['DISTRICT'] == district]['GENERAL'].sum()
     max_votes_2008 = relevant_districts_2008[relevant_districts_2008['DISTRICT'] == district]['GENERAL'].sum()
     max_votes_2010 = relevant_districts_2010[relevant_districts_2010['DISTRICT'] == district]['GENERAL'].sum()
