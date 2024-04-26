@@ -51,13 +51,13 @@ for district in ['10', '21', '25']:
     max_votes = max(max_votes_2006, max_votes_2008, max_votes_2010)
     
     # Plot for 2006
-    plt.bar('2006', relevant_districts_2006[relevant_districts_2006['DISTRICT'] == district]['GENERAL'].sum(), color='blue', label='2006')
+    plt.bar('2006', relevant_districts_2006[relevant_districts_2006['DISTRICT'] == district]['GENERAL'].sum(), color='red', label='2006')
     
     # Plot for 2008
     plt.bar('2008', relevant_districts_2008[relevant_districts_2008['DISTRICT'] == district]['GENERAL'].sum(), color='red', label='2008')
     
     # Plot for 2010
-    plt.bar('2010', relevant_districts_2010[relevant_districts_2010['DISTRICT'] == district]['GENERAL'].sum(), color='green', label='2010')
+    plt.bar('2010', relevant_districts_2010[relevant_districts_2010['DISTRICT'] == district]['GENERAL'].sum(), color='red', label='2010')
     
     plt.xlabel('Year')
     plt.ylabel('Vote Totals')

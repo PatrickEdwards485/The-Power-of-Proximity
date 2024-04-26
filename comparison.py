@@ -72,7 +72,7 @@ for district in ['10', '17', '21', '25', '31']:
     max_votes_2014 = relevant_districts_2014[relevant_districts_2014['D'] == district]['GENERAL VOTES'].sum()
     max_votes_2016 = relevant_districts_2016[relevant_districts_2016['D'] == district]['GENERAL VOTES'].sum()
     max_votes_2018 = relevant_districts_2018[relevant_districts_2018['DISTRICT'] == district]['GENERAL VOTES'].sum()
-    max_votes_2020 = relevant_districts_2018[relevant_districts_2018['DISTRICT'] == district]['GENERAL VOTES'].sum()
+    max_votes_2020 = relevant_districts_2020[relevant_districts_2020['DISTRICT'] == district]['GENERAL VOTES'].sum()
     
     # Find the maximum of the two maximum values
     max_votes = max(max_votes_2012, max_votes_2014, max_votes_2016, max_votes_2018, max_votes_2020)
@@ -98,4 +98,3 @@ for district in ['10', '17', '21', '25', '31']:
     plt.legend()
     plt.ylim(0, max_votes * 1.1)
     plt.show()
- 
