@@ -619,4 +619,192 @@ for district in district_votes.keys():
     plt.title(f'Stacked Bar Graph for District {district}')
     plt.legend()
     plt.show()
+
+
+
+#%%
+# Import necessary modules
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt 
+
+# Function to retrieve population data for congressional districts in Texas
+def get_population(year, state_code, api_key):
+    api_url = f'https://api.census.gov/data/{year}/acs/acs5'
+    for_clause = 'congressional district:*'
+    in_clause = f'state:{state_code}'
     
+    # Construct the API request URL
+    url = f"{api_url}?get=B01001_001E,NAME&for={for_clause}&in={in_clause}&key={api_key}"
+    
+    print("API URL:", url)
+
+    try:
+        # Send the API request
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for unsuccessful requests
+        
+        # Parse the JSON response
+        data = response.json()
+        colnames = data[0]
+        datarows = data[1:]
+        district_population = pd.DataFrame(columns=colnames, data=datarows)
+        district_population = district_population.set_index("congressional district")
+        district_population = district_population.rename(columns={"B01001_001E": "population"})
+
+        print("Population Data:", district_population)
+        
+        return district_population
+    
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., network errors)
+        print(f"Error fetching data: {e}")
+        print(f"Response content: {response.content}")
+        return None
+    
+    except ValueError as e:
+        # Handle JSON decoding errors
+        print(f"Error decoding JSON: {e}")
+        return None
+    
+    
+# Call the function to retrieve population data
+district_population = get_population(2019, "TX", "397e2c2610f07f1b5c63d726a8d2d6959274f01d")
+
+# Check if district_population is None
+if district_population is None:
+    print("Failed to retrieve population data. Exiting...")
+    exit()
+
+# Call the function to plot vote percentage for each district
+plot_vote_percentage(district_votes, district_population)
+#%%
+# Relevant district votes data
+district_votes = {
+    '10': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937},
+    '17': {'2012': 228328, '2014': 228324, '2016': 257480, '2018': 287600, '2020': 293947},
+    '21': {'2012': 264518, '2014': 278590, '2016': 313702, '2018': 343727, '2020': 361356},
+    '25': {'2012': 240629, '2014': 263649, '2016': 293328, '2018': 320164, '2020': 330193},
+    '31': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937}
+}
+
+# TRYING SOMETHING NEW
+
+def plot_vote_percentage(district_votes, district_population):
+    for district, votes_data in district_votes.items():
+        votes_percentage = {}
+        for year, votes in votes_data.items():
+            population = district_population.loc[district, "population"]
+            percentage = (votes / population) * 100
+            votes_percentage[year] = percentage
+        years = list(votes_percentage.keys())
+        percentages = list(votes_percentage.values())
+        
+        plt.figure(figsize=(10, 6))
+        plt.bar(years, percentages, color='red')
+        plt.xlabel('Year')
+        plt.ylabel('Percentage of Votes Compared to Population')
+        plt.title(f'District {district} Vote Percentage Over Years')
+        plt.xticks(years)
+        plt.ylim(0, max(percentages) + 10)
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.show()
+
+
+
+
+
+#%%
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt 
+
+# Function to retrieve population data for congressional districts in Texas
+def get_population(year, state_code, api_key):
+    api_url = f'https://api.census.gov/data/{year}/acs/acs5'
+    for_clause = 'congressional district:*'
+    in_clause = f'state:{state_code}'
+    
+    # Construct the API request URL
+    url = f"{api_url}?get=B01001_001E,NAME&for={for_clause}&in={in_clause}&key={api_key}"
+    
+    print("API URL:", url)  # Print the constructed API URL
+    
+    try:
+        # Send the API request
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for unsuccessful requests
+        
+        # Parse the JSON response
+        data = response.json()
+        colnames = data[0]
+        datarows = data[1:]
+        district_population = pd.DataFrame(columns=colnames, data=datarows)
+        district_population = district_population.set_index("congressional district")
+        district_population = district_population.rename(columns={"B01001_001E": "population"})
+        
+        print("Population Data:", district_population)  # Print the retrieved population data
+        
+        return district_population
+    
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., network errors)
+        print(f"Error fetching data: {e}")
+        print(f"Response content: {response.content}")
+        return None
+    
+    except ValueError as e:
+        # Handle JSON decoding errors
+        print(f"Error decoding JSON: {e}")
+        return None
+
+# Relevant district votes data
+district_votes = {
+    '10': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937},
+    '17': {'2012': 228328, '2014': 228324, '2016': 257480, '2018': 287600, '2020': 293947},
+    '21': {'2012': 264518, '2014': 278590, '2016': 313702, '2018': 343727, '2020': 361356},
+    '25': {'2012': 240629, '2014': 263649, '2016': 293328, '2018': 320164, '2020': 330193},
+    '31': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937}
+}
+
+#%%
+def get_population(year, state_code, api_key):
+    api_url = f'https://api.census.gov/data/{year}/acs/acs5'
+    for_clause = 'congressional district:*'
+    in_clause = f'state:{state_code}'
+    
+    # Construct the API request URL
+    url = f"{api_url}?get=B01001_001E,NAME&for={for_clause}&in={in_clause}&key={api_key}"
+    
+    print("API URL:", url)  # Print the constructed API URL
+    
+    try:
+        # Send the API request
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for unsuccessful requests
+        
+        # Print the response content
+        print("Response Content:", response.text)
+        
+        # Parse the JSON response
+        data = response.json()
+        colnames = data[0]
+        datarows = data[1:]
+        district_population = pd.DataFrame(columns=colnames, data=datarows)
+        district_population = district_population.set_index("congressional district")
+        district_population = district_population.rename(columns={"B01001_001E": "population"})
+        
+        print("Population Data:", district_population)  # Print the retrieved population data
+        
+        return district_population
+    
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., network errors)
+        print(f"Error fetching data: {e}")
+        print(f"Response content: {response.content}")
+        return None
+    
+    except ValueError as e:
+        # Handle JSON decoding errors
+        print(f"Error decoding JSON: {e}")
+        return None
