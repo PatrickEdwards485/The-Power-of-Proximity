@@ -511,15 +511,15 @@ for district in district_votes.keys():
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt 
-
+#%%
 # Function to retrieve population data for congressional districts in Texas
 def get_population(year, state_code, api_key):
-    api_url = f'https://api.census.gov/data/{year}/dec/sf1'
+    api_url = f'https://api.census.gov/data/{year}/acs/acs5'
     for_clause = 'congressional district:*'
     in_clause = f'state:{state_code}'
     
     # Construct the API request URL
-    url = f"{api_url}?get=H001001,NAME&for={for_clause}&in={in_clause}&key={api_key}"
+    url = f"{api_url}?get=B01001_001E,NAME&for={for_clause}&in={in_clause}&key={api_key}"
     
     try:
         # Send the API request
@@ -528,14 +528,20 @@ def get_population(year, state_code, api_key):
         
         # Parse the JSON response
         data = response.json()
+        colnames = data[0]
+        datarows = data[1:]
+        district_population = pd.DataFrame(columns=colnames, data=datarows)
+        district_population = district_population.set_index("congressional district")
+        district_population = district_population.rename(columns={"B01001_001E": "population"})
         
-        # Extract district names and population data
-        district_population = {}
-        for row in data[1:]:
-            district_name = row[1]
-            population = int(row[0])
-            district = district_name.split(',')[0].split(' ')[-1]
-            district_population[district] = population
+        
+        # # Extract district names and population data
+        # district_population = {}
+        # for row in data[1:]:
+        #     district_name = row[1]
+        #     population = int(row[0])
+        #     district = district_name.split(',')[0].split(' ')[-1]
+        #     district_population[district] = population
         
         return district_population
     
@@ -548,23 +554,23 @@ def get_population(year, state_code, api_key):
         # Handle JSON decoding errors
         print(f"Error decoding JSON: {e}")
         return None
-
+#%%
 # Function to calculate total population for each district across the years
-def calculate_total_population(population_data):
-    total_population = {}
-    for year_data in population_data.values():
-        for district, population in year_data.items():
-            if district not in total_population:
-                total_population[district] = 0
-            total_population[district] += population
-    return total_population
+# def calculate_total_population(population_data):
+#     total_population = {}
+#     for year_data in population_data.values():
+#         for district, population in year_data.items():
+#             if district not in total_population:
+#                 total_population[district] = 0
+#             total_population[district] += population
+#     return total_population
 
-# Retrieve population data for the 2010 Census
-state_code = '48'  # Texas state code
-year = 2010  # 2010 Census
-api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'  # Replace 'YOUR_API_KEY' with your actual API key
-population_2010 = get_population(year, state_code, api_key)
-print("Population data for 2010 Census:", population_2010)
+# # Retrieve population data for the 2010 Census
+# state_code = '48'  # Texas state code
+# year = 2010  # 2010 Census
+# api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'  # Replace 'YOUR_API_KEY' with your actual API key
+# population_2010 = get_population(year, state_code, api_key)
+# print("Population data for 2010 Census:", population_2010)
 
 # Example district votes data
 district_votes = {
