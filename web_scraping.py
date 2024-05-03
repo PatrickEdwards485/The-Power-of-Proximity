@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 
-eids = [154, 179, 192, 196, 198, 201, 205, 208, 214]
+eids = [154, 179, 192, 196, 198, 201, 205, 208]
 
 api = "https://services.austintexas.gov/election/byrecord.cfm"
 
@@ -39,11 +39,10 @@ data_sorted = data.sort_values(by='Year')
 
 plt.figure(figsize=(10, 6))
 plt.bar(data_sorted['Date of Election:'], data_sorted['Percent of Registered Voters Who Voted:'], color='skyblue')
-plt.title('Austin City Council General Election Turnout (2006-2022)')
+plt.title('Austin City Council General Election Turnout (2006-2020)')
 plt.xlabel('Date of Election')
 plt.ylabel('Turnout (%)')
 plt.xticks(rotation=45)
 
 plt.tight_layout()
 plt.show()
- 
