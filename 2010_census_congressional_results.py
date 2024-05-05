@@ -55,7 +55,7 @@ merged_data = {}
 
 #for district, votes_data in district_votes.items():
 #    print(f"Fetching data for district {district}...")
-#    population_data = get_population(2019, '48', '397e2c2610f07f1b5c63d726a8d2d6959274f01d')
+#    population_data = get_population(2019, '48', 'api_key')
 #    if population_data is not None:
 #        print(f"Population data for district {district} retrieved successfully.")
 #        merged_data[district] = population_data.join(pd.DataFrame(votes_data, index=[0])).astype(int)
