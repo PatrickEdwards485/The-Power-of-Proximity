@@ -62,7 +62,7 @@ merged_data = {}
 #    else:
 #        print(f"Failed to retrieve population data for district {district}.")
 
-api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
+api_key = 'your_API_key_here' # Replace code with your assigned Census API key
 
 for year in ['2012','2014','2016','2018','2020']:
     print(f"Fetching Census data for year {year}...")
