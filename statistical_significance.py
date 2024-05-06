@@ -1,7 +1,8 @@
 # Import necessary modules
-import requests
 import pandas as pd
+import requests 
 import matplotlib.pyplot as plt
+from scipy import stats
 
 # Function to retrieve population data for congressional districts in Texas
 def get_population(year, state_code, api_key, acs_type):
@@ -51,20 +52,22 @@ district_votes_before = {
 }
 
 district_votes_after = {
-    '10': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937},
-    '17': {'2012': 228328, '2014': 228324, '2016': 257480, '2018': 287600, '2020': 293947},
-    '21': {'2012': 264518, '2014': 278590, '2016': 313702, '2018': 343727, '2020': 361356},
-    '25': {'2012': 240629, '2014': 263649, '2016': 293328, '2018': 320164, '2020': 330193},
-    '31': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937}
+    '10': {'2014': 237187, '2016': 289194, '2018': 312626, '2020': 323937},
+    '21': {'2014': 264518, '2016': 313702, '2018': 343727, '2020': 361356},
+    '25': {'2014': 240629, '2016': 293328, '2018': 320164, '2020': 330193},
 }
 
-# Merge population and voting data for each district for the period before ward district representation
+# Control group data (for diff-in-diff)
+control_before = [176755, 203782, 163424]  # Example values, replace with actual data
+control_after = [237187, 264518, 240629]  # Example values, replace with actual data
+
+# Merge population and voting data for each district
 merged_data_before = {}
 merged_data_after = {}
 
 api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
 
-# Fetch and merge data for the period from 2006 to 2010
+# Fetch and merge data for the period from 2006 to 2012
 for year in ['2006', '2008', '2010']:
     print(f"Fetching Census data for year {year}...")
     population_data = get_population(year, '48', api_key, '1-year')
@@ -74,8 +77,8 @@ for year in ['2006', '2008', '2010']:
     population_data['district'] = district_data
     merged_data_before[year] = population_data
 
-# Fetch and merge data for the period from 2012 to 2020
-for year in ['2012', '2014', '2016', '2018', '2020']:
+# Fetch and merge data for the period from 2014 to 2020
+for year in ['2014', '2016', '2018', '2020']:
     print(f"Fetching Census data for year {year}...")
     population_data = get_population(year, '48', api_key, '5-year')
     print("Building district data...")
@@ -102,31 +105,65 @@ merged_after['district'] = pd.to_numeric(merged_after['district'])
 merged_after['population'] = pd.to_numeric(merged_after['population'])
 
 # Calculate turnout ratio for each period
-merged_before['votes_per_capita'] = merged_before['district'] / merged_before['population']
-merged_after['votes_per_capita'] = merged_after['district'] / merged_after['population']
+merged_before['turnout_ratio'] = merged_before['district'] / merged_before['population']
+merged_after['turnout_ratio'] = merged_after['district'] / merged_after['population']
 
-# Aggregate the data by year and calculate the mean
-avg_voter_participation_before = merged_before.groupby('year')['votes_per_capita'].mean().reset_index()
-avg_voter_participation_after = merged_after.groupby('year')['votes_per_capita'].mean().reset_index()
+# Calculate the difference in means for the diff-in-diff analysis
+diff_in_means_before = merged_before['turnout_ratio'].mean() - pd.Series(control_before).mean()
+diff_in_means_after = merged_after['turnout_ratio'].mean() - pd.Series(control_after).mean()
 
-# Plotting the comparison
+# Perform the t-test
+t_statistic, p_value = stats.ttest_ind(merged_before['turnout_ratio'], pd.Series(control_before))
+t_statistic_after, p_value_after = stats.ttest_ind(merged_after['turnout_ratio'], pd.Series(control_after))
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.bar(['2006-2012', '2014-2020'], [merged_before['turnout_ratio'].mean(), merged_after['turnout_ratio'].mean()], color='blue', label='City Council')
+plt.bar(['2006-2012', '2014-2020'], [pd.Series(control_before).mean(), pd.Series(control_after).mean()], color='red', label='Congressional Districts')
+
+# Annotate the bars with the difference in means
+plt.text(0, merged_before['turnout_ratio'].mean() + 0.01, f'Diff in Means: {diff_in_means_before:.4f}', ha='center', va='bottom')
+plt.text(1, merged_after['turnout_ratio'].mean() + 0.01, f'Diff in Means: {diff_in_means_after:.4f}', ha='center', va='bottom')
+
+plt.title('Average Turnout Ratio Comparison')
+plt.xlabel('Period')
+plt.ylabel('Turnout Ratio (Votes/Population)')
+plt.grid(axis='y')
+plt.legend()
+plt.show()
+
+# Print t-test results
+print("T-test results for 2006-2012:")
+print(f"T-statistic: {t_statistic:.4f}, p-value: {p_value:.4f}")
+print("\nT-test results for 2014-2020:")
+print(f"T-statistic: {t_statistic_after:.4f}, p-value: {p_value_after:.4f}")
+
+
+#%%
+from scipy import stats
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Calculate the difference in means for the diff-in-diff analysis
+diff_in_means_before = (merged_before['turnout_ratio'] - merged_before['district']).mean()
+diff_in_means_after = (merged_after['turnout_ratio'] - merged_after['district']).mean()
+
+# Perform the t-test
+t_statistic, p_value = stats.ttest_ind(merged_before['turnout_ratio'] - merged_before['district'],
+                                       merged_after['turnout_ratio'] - merged_after['district'])
+
+# Plotting
 plt.figure(figsize=(10, 6))
 
-# Plotting the average voter participation ratios for the period before ward district representation
-plt.plot(avg_voter_participation_before['year'], avg_voter_participation_before['votes_per_capita'], marker='o', label='Before (2006-2010)')
+# Plot bars for the difference-in-differences
+plt.bar(['2006-2012', '2014-2020'], [diff_in_means_before, diff_in_means_after], color=['blue', 'red'])
 
-# Plotting the average voter participation ratios for the period after ward district representation
-plt.plot(avg_voter_participation_after['year'], avg_voter_participation_after['votes_per_capita'], marker='o', label='After (2012-2020)')
-
-# Adding labels and title
-plt.xlabel('Year')
-plt.ylabel('Average Ratio of Voters vs Population')
-plt.title('Average Voter Participation Across Congressional Districts')
-plt.xticks(rotation=45)
-
-# Adding legend
-plt.legend()
-
-# Display the plot
-plt.tight_layout()
+plt.title('Difference-in-Differences Analysis')
+plt.xlabel('Period')
+plt.ylabel('Difference in Means (Turnout Ratio)')
+plt.grid(axis='y')
 plt.show()
+
+# Print t-test results
+print("Difference-in-Differences T-test results:")
+print(f"T-statistic: {t_statistic:.4f}, p-value: {p_value:.4f}")
