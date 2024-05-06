@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Function to retrieve population data for congressional districts in Texas
 def get_population(year, state_code, api_key):
-    api_url = f'https://api.census.gov/data/{year}/acs/acs5'
+    api_url = f'https://api.census.gov/data/{year}/acs/acs1'
     for_clause = 'congressional district:*'
     in_clause = f'state:{state_code}'
 
@@ -27,7 +27,7 @@ def get_population(year, state_code, api_key):
         district_population = district_population.rename(columns={"B01001_001E": "population"})
 
         return district_population
-
+    
     except requests.exceptions.RequestException as e:
         # Handle request exceptions (e.g., network errors)
         print(f"Error fetching data: {e}")
@@ -40,11 +40,9 @@ def get_population(year, state_code, api_key):
 
 # Relevant district votes data
 district_votes = {
-    '10': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937},
-    '17': {'2012': 228328, '2014': 228324, '2016': 257480, '2018': 287600, '2020': 293947},
-    '21': {'2012': 264518, '2014': 278590, '2016': 313702, '2018': 343727, '2020': 361356},
-    '25': {'2012': 240629, '2014': 263649, '2016': 293328, '2018': 320164, '2020': 330193},
-    '31': {'2012': 237187, '2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937}
+    '10': {'2006': 176755, '2008': 333083, '2010': 224171},
+    '21': {'2006': 203782, '2008': 304350, '2010': 236545},
+    '25': {'2006': 163424, '2008': 291296, '2010': 189247},
 }
 
 # Merge population and voting data for each district
@@ -52,7 +50,7 @@ merged_data = {}
 
 api_key = config.API_KEY
 
-for year in ['2012','2014','2016','2018','2020']:
+for year in ['2006','2008','2010']:
     print(f"Fetching Census data for year {year}...")
     population_data = get_population(year, '48', api_key)
     print("Building district data...")

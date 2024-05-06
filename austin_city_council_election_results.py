@@ -32,17 +32,26 @@ data = pd.DataFrame(pages)
 
 print(data)
 
-data['Percent of Registered Voters Who Voted:'] = data['Percent of Registered Voters Who Voted:'].str.rstrip('%').astype(float)
+# Remove commas from 'Total Ballots Cast' and 'City Population' columns and convert to float
+data['Total Ballots Cast:'] = data['Total Ballots Cast:'].str.replace(',', '').astype(float)
+data['City Population (at Time of the Election):'] = data['City Population (at Time of the Election):'].str.replace(',', '').astype(float)
+
+# Calculate ratio of 'Total Ballots Cast' to 'City Population'
+data['Ballots to Population Ratio'] = data['Total Ballots Cast:'] / data['City Population (at Time of the Election):']
+
+# Convert 'Date of Election' to datetime and extract year
 data['Year'] = pd.to_datetime(data['Date of Election:']).dt.year
 
+# Sort the data by year
 data_sorted = data.sort_values(by='Year')
 
+# Plot the ratio over the years
 plt.figure(figsize=(10, 6))
-plt.bar(data_sorted['Date of Election:'], data_sorted['Percent of Registered Voters Who Voted:'], color='skyblue')
-plt.title('Austin City Council General Election Turnout (2006-2020)')
-plt.xlabel('Date of Election')
-plt.ylabel('Turnout (%)')
-plt.xticks(rotation=45)
-
+plt.bar(data_sorted['Year'], data_sorted['Ballots to Population Ratio'], color='blue')
+plt.title('Ratio of Total Ballots Cast to City Population (2006-2020)')
+plt.xlabel('Year')
+plt.ylabel('Ballots to Population Ratio')
+plt.xticks(data_sorted['Year'], rotation=45)
+plt.grid(axis='y')
 plt.tight_layout()
 plt.show()
