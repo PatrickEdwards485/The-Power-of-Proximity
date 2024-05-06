@@ -50,7 +50,7 @@ district_votes = {
 # Merge population and voting data for each district
 merged_data = {}
 
-api_key = config.API_KEY
+api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
 
 for year in ['2012','2014','2016','2018','2020']:
     print(f"Fetching Census data for year {year}...")

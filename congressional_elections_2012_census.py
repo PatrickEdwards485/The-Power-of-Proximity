@@ -1045,3 +1045,331 @@ for district, votes_data in district_votes.items():
     else:
         print(f"Failed to retrieve population data for district {district}.")
         
+        
+#%%
+# SCRAP aggregate_election_results.py files
+
+# Import necessary modules
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Function to retrieve population data for congressional districts in Texas
+def get_population(year, state_code, api_key, acs_type):
+    if acs_type == '1-year':
+        api_url = f'https://api.census.gov/data/{year}/acs/acs1'
+    elif acs_type == '5-year':
+        api_url = f'https://api.census.gov/data/{year}/acs/acs5'
+    else:
+        print("Invalid ACS type. Please specify '1-year' or '5-year'.")
+        return None
+    
+    for_clause = 'congressional district:*'
+    in_clause = f'state:{state_code}'
+
+    # Construct the API request URL
+    url = f"{api_url}?get=B01001_001E,NAME&for={for_clause}&in={in_clause}&key={api_key}"
+
+    try:
+        # Send the API request
+        response = requests.get(url)
+        response.raise_for_status()
+
+        # Parse the JSON response
+        data = response.json()
+        colnames = data[0]
+        datarows = data[1:]
+        district_population = pd.DataFrame(columns=colnames, data=datarows)
+        district_population = district_population.set_index("congressional district")
+        district_population = district_population.rename(columns={"B01001_001E": "population"})
+
+        return district_population
+
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., network errors)
+        print(f"Error fetching data: {e}")
+        return None
+
+    except ValueError as e:
+        # Handle JSON decoding errors
+        print(f"Error decoding JSON: {e}")
+        return None
+
+# Relevant district votes data
+district_votes_before = {
+    '10': {'2006': 176755, '2008': 333083, '2010': 224171, '2012': 237187},
+    '17': {'2012': 228328},
+    '21': {'2006': 203782, '2008': 304350, '2010': 236545, '2012': 264518},
+    '25': {'2006': 163424, '2008': 291296, '2010': 189247, '2012': 240629},
+    '31': {'2012': 237187},
+}
+
+district_votes_after = {
+    '10': {'2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937},
+    '17': {'2014': 228324, '2016': 257480, '2018': 287600, '2020': 293947},
+    '21': {'2014': 278590, '2016': 313702, '2018': 343727, '2020': 361356},
+    '25': {'2014': 263649, '2016': 293328, '2018': 320164, '2020': 330193},
+    '31': {'2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937}
+}
+
+# Insert your API key here
+api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
+
+# Define a function to calculate turnout
+def calculate_turnout(votes_data):
+    turnout = {}
+    for district, elections in votes_data.items():
+        total_votes = sum(elections.values())
+        turnout[district] = total_votes
+    return turnout
+
+# Calculate turnout for before treatment period
+turnout_before = calculate_turnout(district_votes_before)
+
+# Calculate turnout for after treatment period
+turnout_after = calculate_turnout(district_votes_after)
+
+# Combine turnout data into a DataFrame
+turnout_data = pd.DataFrame({'Before Treatment': turnout_before, 'After Treatment': turnout_after})
+
+# Create a boxplot to visualize the mean turnout before and after treatment
+plt.figure(figsize=(8, 6))
+turnout_data.boxplot()
+plt.title('Mean Turnout Before and After Treatment')
+plt.ylabel('Turnout Ratio')
+plt.xlabel('Treatment Period')
+plt.show()
+
+
+
+#%%
+# Imported necessary modules
+import pandas as pd
+import requests 
+from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
+
+def get_election_data(eids):
+    api = "https://services.austintexas.gov/election/byrecord.cfm"
+
+    pages = []
+
+    for e in eids:
+        payload = {'eid': e}
+        response = requests.get(api, payload)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        main = soup.body.main
+        tables = main.findAll('table')
+        summary = tables[0]
+        trs = summary.findAll('tr')
+        rows = {}
+        for tr in trs:
+            tds = tr.findAll('td')
+            rows[tds[0].string] = tds[1].string
+        pages.append(rows)
+        rest = tables[1:]
+
+    return pd.DataFrame(pages)
+
+def calculate_turnout(data):
+    # Remove commas from 'Total Ballots Cast' and 'City Population' columns and convert to float
+    data['Total Ballots Cast:'] = data['Total Ballots Cast:'].str.replace(',', '').astype(float)
+    data['City Population (at Time of the Election):'] = data['City Population (at Time of the Election):'].str.replace(',', '').astype(float)
+
+    # Calculate ratio of 'Total Ballots Cast' to 'City Population'
+    data['Ballots to Population Ratio'] = data['Total Ballots Cast:'] / data['City Population (at Time of the Election):']
+
+    # Convert 'Date of Election' to datetime and extract year
+    data['Year'] = pd.to_datetime(data['Date of Election:']).dt.year
+
+    # Sort the data by year
+    data_sorted = data.sort_values(by='Year')
+
+    return data_sorted
+
+# EIDs for relevant elections
+eids = [154, 179, 192, 196, 198, 201, 205, 208]
+
+# Retrieve election data
+election_data = get_election_data(eids)
+
+# Calculate turnout
+turnout_data = calculate_turnout(election_data)
+
+# Calculate average turnout ratio for Austin City Council elections
+average_turnout_city_council = turnout_data['Ballots to Population Ratio'].mean()
+
+# Relevant district votes data (before and after treatment)
+district_votes_before = {
+    '10': {'2012': 237187},
+    '17': {'2012': 228328},
+    '21': {'2012': 264518},
+    '25': {'2012': 240629},
+    '31': {'2012': 237187}
+}
+
+district_votes_after = {
+    '10': {'2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937},
+    '17': {'2014': 228324, '2016': 257480, '2018': 287600, '2020': 293947},
+    '21': {'2014': 278590, '2016': 313702, '2018': 343727, '2020': 361356},
+    '25': {'2014': 263649, '2016': 293328, '2018': 320164, '2020': 330193},
+    '31': {'2014': 257725, '2016': 289194, '2018': 312626, '2020': 323937}
+}
+
+# Calculate turnout for aggregated congressional elections before and after treatment
+def calculate_congressional_turnout(votes_data):
+    turnout = {}
+    for district, elections in votes_data.items():
+        total_votes = sum(elections.values())
+        turnout[district] = total_votes
+    return turnout
+
+congressional_turnout_before = calculate_congressional_turnout(district_votes_before)
+congressional_turnout_after = calculate_congressional_turnout(district_votes_after)
+
+# Calculate average turnout ratio for aggregated congressional elections before treatment
+average_turnout_congressional_before = sum(congressional_turnout_before.values()) / len(congressional_turnout_before)
+
+# Calculate average turnout ratio for aggregated congressional elections after treatment
+average_turnout_congressional_after = sum(congressional_turnout_after.values()) / len(congressional_turnout_after)
+
+# Create a boxplot to compare the average turnout before and after treatment
+plt.figure(figsize=(8, 6))
+plt.boxplot([
+    [average_turnout_city_council], 
+    [average_turnout_congressional_before], 
+    [average_turnout_congressional_after]
+], 
+labels=['City Council', 'Congressional Before', 'Congressional After'])
+plt.title('Average Turnout Before and After Treatment')
+plt.ylabel('Turnout Ratio')
+plt.xlabel('Treatment Period')
+plt.show()
+
+
+
+#%%
+import pandas as pd
+import requests
+import matplotlib.pyplot as plt
+
+# Function to retrieve population data for congressional districts in Texas
+def get_population(year, state_code, api_key, acs_type):
+    if acs_type == '1-year':
+        api_url = f'https://api.census.gov/data/{year}/acs/acs1'
+    elif acs_type == '5-year':
+        api_url = f'https://api.census.gov/data/{year}/acs/acs5'
+    else:
+        raise ValueError("Invalid ACS type. Please specify '1-year' or '5-year'.")
+
+    for_clause = 'congressional district:*'
+    in_clause = f'state:{state_code}'
+
+    # Construct the API request URL
+    url = f"{api_url}?get=B01001_001E,NAME&for={for_clause}&in={in_clause}&key={api_key}"
+
+    try:
+        # Send the API request
+        response = requests.get(url)
+        response.raise_for_status()
+
+        # Parse the JSON response
+        data = response.json()
+        colnames = data[0]
+        datarows = data[1:]
+        district_population = pd.DataFrame(columns=colnames, data=datarows)
+        district_population = district_population.set_index("congressional district")
+        district_population = district_population.rename(columns={"B01001_001E": "population"})
+
+        return district_population
+    
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., network errors)
+        print(f"Error fetching data: {e}")
+        return None
+
+    except ValueError as e:
+        # Handle JSON decoding errors
+        print(f"Error decoding JSON: {e}")
+        return None
+
+# Define the API key
+api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
+
+# Define the relevant district votes data for Austin, Texas
+district_votes_before = {
+    '10': {'2006': 176755, '2008': 333083, '2010': 224171},
+    '21': {'2006': 203782, '2008': 304350, '2010': 236545},
+    '25': {'2006': 163424, '2008': 291296, '2010': 189247},
+}
+
+district_votes_after = {
+    '10': {'2014': 237187, '2016': 289194, '2018': 312626, '2020': 323937},
+    '21': {'2014': 264518, '2016': 313702, '2018': 343727, '2020': 361356},
+    '25': {'2014': 240629, '2016': 293328, '2018': 320164, '2020': 330193},
+}
+
+# Function to calculate average votes versus population ratio for congressional district elections
+def calculate_congressional_turnout(district_votes):
+    average_turnout = {}
+    for year, district_data in district_votes.items():
+        population_data = get_population(year, '48', api_key, acs_type='1-year')
+        if population_data is not None:
+            total_votes = sum(district_data.values())
+            total_population = sum(population_data['population'].astype(int))
+            average_turnout[year] = total_votes / total_population
+    return average_turnout
+
+# Function to plot the average turnout ratios for Austin City Council and Congressional District Elections
+def plot_average_turnout():
+    # Calculate average ballots cast versus total population for Austin City Council elections (2006-2012)
+    average_turnout_city_council_before = turnout_data[turnout_data['Year'] <= 2012]['Ballots to Population Ratio'].mean()
+
+    # Aggregate the data for congressional district elections (2006-2012) and calculate the average votes versus population ratio
+    average_turnout_congressional_before = calculate_congressional_turnout(district_votes_before)
+
+    # Calculate average ballots cast versus total population for Austin City Council elections (2014-2020)
+    average_turnout_city_council_after = turnout_data[turnout_data['Year'] >= 2014]['Ballots to Population Ratio'].mean()
+
+    # Aggregate the data for congressional district elections (2014-2020) and calculate the average votes versus population ratio
+    average_turnout_congressional_after = calculate_congressional_turnout(district_votes_after)
+
+    # Plotting the results
+    plt.figure(figsize=(10, 8))
+
+    # Bar width
+    bar_width = 0.35
+
+    # Define the x locations for the groups
+    index = [1, 2]
+
+    # Plotting the data for Austin City Council elections
+    plt.bar(index[0], average_turnout_city_council_before, bar_width, label='City Council (2006-2012)', color='b')
+    plt.bar(index[1], average_turnout_city_council_after, bar_width, label='City Council (2014-2020)', color='g')
+
+    # Plotting the data for congressional district elections
+    if average_turnout_congressional_before:
+        avg_turnout_before = sum(average_turnout_congressional_before.values()) / len(average_turnout_congressional_before)
+    else:
+        avg_turnout_before = 0
+    plt.bar(index[0] + bar_width, avg_turnout_before, bar_width, label='Congressional (2006-2012)', color='r')
+
+    if average_turnout_congressional_after:
+        avg_turnout_after = sum(average_turnout_congressional_after.values()) / len(average_turnout_congressional_after)
+    else:
+        avg_turnout_after = 0
+    plt.bar(index[1] + bar_width, avg_turnout_after, bar_width, label='Congressional (2014-2020)', color='y')
+
+    # Adding labels and title
+    plt.xlabel('Period')
+    plt.ylabel('Average Turnout Ratio')
+    plt.title('Average Turnout Ratio for Austin City Council and Congressional District Elections')
+    plt.xticks([index[0] + bar_width / 2, index[1] + bar_width / 2], ['Before Treatment', 'After Treatment'])
+    plt.legend()
+
+    # Show plot
+    plt.tight_layout()
+    plt.show()
+
+# Execute the function to plot the average turnout ratios
+plot_average_turnout()
