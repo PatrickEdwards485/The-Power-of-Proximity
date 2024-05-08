@@ -45,7 +45,7 @@ def get_population(year, state_code, api_key, acs_type):
         print(f"Error decoding JSON: {e}")
         return None
 
-# Relevant district votes data
+# Relevant district votes data (hardcoded due to time constraints)
 district_votes_before = {
     '10': {'2006': 176755, '2008': 333083, '2010': 224171},
     '21': {'2006': 203782, '2008': 304350, '2010': 236545},
@@ -64,7 +64,8 @@ district_votes_after = {
 merged_data_before = {}
 merged_data_after = {}
 
-api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
+# Insert API key to access ACS data
+api_key = 'your_API_key_here'
 
 # Fetch and merge data for the period from 2006 to 2010
 for year in ['2006', '2008', '2010']:
@@ -117,6 +118,7 @@ import requests
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 
+# Web scrape relevant data from online database 
 eids = [154, 179, 192, 196, 198, 201, 205, 208]
 
 api = "https://services.austintexas.gov/election/byrecord.cfm"

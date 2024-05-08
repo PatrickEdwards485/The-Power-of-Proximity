@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 
+# Web scrape relevant data from online database 
 eids = [154, 179, 192, 196, 198, 201, 205, 208]
 
 api = "https://services.austintexas.gov/election/byrecord.cfm"

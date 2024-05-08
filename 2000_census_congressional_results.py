@@ -38,7 +38,7 @@ def get_population(year, state_code, api_key):
         print(f"Error decoding JSON: {e}")
         return None
 
-# Relevant district votes data
+# Relevant district votes data (hardcoded due to time constraints)
 district_votes = {
     '10': {'2006': 176755, '2008': 333083, '2010': 224171},
     '21': {'2006': 203782, '2008': 304350, '2010': 236545},
@@ -48,8 +48,10 @@ district_votes = {
 # Merge population and voting data for each district
 merged_data = {}
 
-api_key = '397e2c2610f07f1b5c63d726a8d2d6959274f01d'
+# Insert API key to access ACS data
+api_key = 'your_API_key_here'
 
+# Loop through specific years to fetch census data and merge with district voting data
 for year in ['2006','2008','2010']:
     print(f"Fetching Census data for year {year}...")
     population_data = get_population(year, '48', api_key)
@@ -59,8 +61,17 @@ for year in ['2006','2008','2010']:
     population_data['district'] = district_data
     merged_data[year] = population_data
 
-merged = pd.concat(merged_data,names=['year','cd'])
+# Concatenate the data stored in the dictionary 'merged_data' along the axis (default is 0, which means rows) 
+# This combines the data from multiple years into a single DataFrame
+# The 'names' parameter assigns names to the levels of the resulting MultiIndex
+merged = pd.concat(merged_data, names=['year', 'cd'])
+
+# Reset the index of the DataFrame
+# This converts the index into a column and resets it to a default RangeIndex
 merged = merged.reset_index()
+
+# Drop rows with any missing values (NaNs)
+# This removes any rows with missing data, ensuring data cleanliness
 merged = merged.dropna()
 
 # Iterate over each congressional district
