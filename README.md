@@ -35,7 +35,7 @@ The data generated to produce population data for congressional districts which 
 
 ### Output Data 
 
-A script called **austin_city_council_elections.py** generates a graph which shows the ratio of Austin City Council election voters versus the population of Austin in municipal elections from 2006 to 2022. 
+A script called **austin_city_council_election_results.py** generates a graph which shows the ratio of Austin City Council election voters versus the population of Austin in municipal elections from 2006 to 2022. 
 
 A script called **2000_census_congressional_results** generates three graphs which each show the ratio of congressional election voters versus the population of the district in each respective congressional district which overlapped with Austin city limits during the 2006, 2008, and 2010 elections (Districts 10, 21, and 25) in congressional elections from 2006 to 2010. 
     * This script necessitates an API key. 
