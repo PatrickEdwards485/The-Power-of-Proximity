@@ -1,6 +1,5 @@
 # Import necessary modules
 import requests
-import config
 import pandas as pd
 import matplotlib.pyplot as plt
 
