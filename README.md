@@ -35,18 +35,18 @@ The data generated to produce population data for congressional districts which 
 
 ### Output Data 
 
-A script called **austin_city_council_election_results.py** generates a graph which shows the ratio of Austin City Council election voters versus the population of Austin in municipal elections from 2006 to 2022. 
+A script called **austin_city_council_election_results.py** generates a graph (city_council_elections_graph.png) which shows the ratio of Austin City Council election voters versus the population of Austin in municipal elections from 2006 to 2022. 
 
-A script called **2000_census_congressional_results** generates three graphs which each show the ratio of congressional election voters versus the population of the district in each respective congressional district which overlapped with Austin city limits during the 2006, 2008, and 2010 elections (Districts 10, 21, and 25) in congressional elections from 2006 to 2010. 
+A script called **2000_census_congressional_results** generates three graphs (district_10_2000_census.png; district_21_2000_census.png; district_25_2000_census.png) which each show the ratio of congressional election voters versus the population of the district in each respective congressional district which overlapped with Austin city limits during the 2006, 2008, and 2010 elections (Districts 10, 21, and 25) in congressional elections from 2006 to 2010. 
     * This script necessitates an API key. 
 
-A script called **2010_census_congressional_results** generates five graphs which each show the ratio of congressional election voters versus the population of the district in each respective congressional district which overlapped with Austin city limits during the 2012, 2014, 2016, 2018, and 2020 elections (Districts 10, 17, 21, 25, and 31) in congressional elections from 2012 to 2020.  
+A script called **2010_census_congressional_results** generates five graphs (district_10_2010_census.png; district_17_2010_census.png; district_21_2010_census.png; district_25_2010_census.png; district_31_2010_census.png) which each show the ratio of congressional election voters versus the population of the district in each respective congressional district which overlapped with Austin city limits during the 2012, 2014, 2016, 2018, and 2020 elections (Districts 10, 17, 21, 25, and 31) in congressional elections from 2012 to 2020.  
     * This script necessitates an API key. 
 
-A script called **aggregate_election_results.py** generates a graph which shows the average aggregate ratio of congressional election voters versus the population of the districts from 2006 to 2012 (before ward representation), and the average aggregate ratio of congressional election voters versus the population of the districts from 2014 to 2020 (after ward representation). 
+A script called **aggregate_election_results.py** generates a graph (aggregate_congressional_elections_graph.png) which shows the average aggregate ratio of congressional election voters versus the population of the districts from 2006 to 2012 (before ward representation), and the average aggregate ratio of congressional election voters versus the population of the districts from 2014 to 2020 (after ward representation). 
     * This script necessitates an API key. 
 
-A script called **election_comparison.py** generates a graph which shows the average aggregate ratio of congressional election voters against the ratio of Austin City Council election voters from the 2006 to 2020 elections for user visualization and comparison. 
+A script called **election_comparison.py** generates a graph (elections_comparison_graph.png) which shows the average aggregate ratio of congressional election voters against the ratio of Austin City Council election voters from the 2006 to 2020 elections for user visualization and comparison. 
     * This script necessitates an API key. 
 
 ### Findings 
